@@ -131,8 +131,8 @@ code for c
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
-#define KEY_LEN 32  // 256 bits
-#define IV_LEN 16   // 128 bits
+#define KEY_LEN 32   // 256 bits for AES-256
+#define IV_LEN 16    // 128 bits block size for AES
 
 void handleErrors() {
     ERR_print_errors_fp(stderr);
