@@ -117,3 +117,106 @@ The project consists of multiple modules, including authentication, encryption, 
 
 With the rise in cyber threats, organizations face challenges in securing sensitive files and preventing unauthorized access. Traditional password-based authentication is insufficient, making it necessary to integrate advanced authentication mechanisms, encryption, and access control policies.
 
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+code for c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+
+#define KEY_LEN 32  // 256 bits
+#define IV_LEN 16   // 128 bits
+
+void handleErrors() {
+    ERR_print_errors_fp(stderr);
+    abort();
+}
+
+int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
+            unsigned char *iv, unsigned char *ciphertext) {
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    int len, ciphertext_len;
+
+    EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv);
+    EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len);
+    ciphertext_len = len;
+
+    EVP_EncryptFinal_ex(ctx, ciphertext + len, &len);
+    ciphertext_len += len;
+    EVP_CIPHER_CTX_free(ctx);
+
+    return ciphertext_len;
+}
+
+int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
+            unsigned char *iv, unsigned char *plaintext) {
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    int len, plaintext_len;
+
+    EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv);
+    EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len);
+    plaintext_len = len;
+
+    EVP_DecryptFinal_ex(ctx, plaintext + len, &len);
+    plaintext_len += len;
+    EVP_CIPHER_CTX_free(ctx);
+
+    return plaintext_len;
+}
+
+int main() {
+    unsigned char key[KEY_LEN];
+    unsigned char iv[IV_LEN];
+    char filename[100];
+    char input[1024];
+    FILE *fp;
+
+    RAND_bytes(key, sizeof(key));
+    RAND_bytes(iv, sizeof(iv));
+
+    printf("Enter filename to write: ");
+    scanf("%s", filename);
+    getchar();  // consume newline
+    printf("Enter content: ");
+    fgets(input, sizeof(input), stdin);
+
+    int input_len = strlen(input);
+    if (input[input_len - 1] == '\n') input[--input_len] = '\0';
+
+    unsigned char encrypted[2048];
+    int encrypted_len = encrypt((unsigned char *)input, input_len, key, iv, encrypted);
+
+    fp = fopen(filename, "wb");
+    if (!fp) {
+        perror("File opening failed");
+        return 1;
+    }
+    fwrite(encrypted, 1, encrypted_len, fp);
+    fclose(fp);
+    printf("File saved securely!\n");
+
+    printf("Reading file...\n");
+    fp = fopen(filename, "rb");
+    if (!fp) {
+        perror("File opening failed");
+        return 1;
+    }
+
+    unsigned char read_buf[2048];
+    int read_len = fread(read_buf, 1, sizeof(read_buf), fp);
+    fclose(fp);
+
+    unsigned char decrypted[2048];
+    int decrypted_len = decrypt(read_buf, read_len, key, iv, decrypted);
+    decrypted[decrypted_len] = '\0';
+
+    printf("Decrypted Content: %s\n", decrypted);
+
+    return 0;
+}
+
