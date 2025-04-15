@@ -123,10 +123,12 @@ With the rise in cyber threats, organizations face challenges in securing sensit
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 code for c
-#include <stdio.h>
+##include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <openssl/conf.h>
 #include <openssl/evp.h>
+#include <openssl/err.h>
 #include <openssl/rand.h>
 
 #define KEY_LEN 32  // 256 bits
