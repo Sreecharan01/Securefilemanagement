@@ -5,7 +5,7 @@
 #define PASSWORD "admin123"
 #define MAX_FILENAME 100
 #define BUFFER_SIZE 1024
-#define KEY 0xAA  // XOR key for basic encryption
+#define KEY 0xAA 
 
 void encryptDecrypt(char *data, int size) {
     for (int i = 0; i < size; i++)
@@ -25,7 +25,7 @@ void createFile() {
 
     printf("Enter file name: ");
     scanf("%s", filename);
-    getchar(); // consume newline
+    getchar(); 
 
     printf("Enter file content:\n");
     fgets(data, BUFFER_SIZE, stdin);
